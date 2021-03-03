@@ -15,17 +15,11 @@ pygame.display.set_caption('Intersection demo')
 screen.fill(background_colour)
 pygame.display.flip()
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-image_path = os.path.join(current_dir, "redcar.png")
-car_image = pygame.image.load(image_path)
-
-ppu = 32
 clock = pygame.time.Clock()
 racetrack = Racetrack(width, height)
 carX = racetrack.checkpoints[0][0]
 carY = racetrack.checkpoints[0][1]
 car = Car(carX, carY)
-
 
 ppu = 32
 running = True
@@ -76,26 +70,25 @@ while running:
         car.steering = 0
     car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
 
-
     car.update(dt)
 
-    screen.fill((0,0,0))
+    screen.fill(background_colour)
 
     pygame.draw.lines(screen, (255,255,255), True, racetrack.outerLine)
     pygame.draw.lines(screen, (255,255,255), True, racetrack.innerLine)
+
     for checkpoint in racetrack.checkpoints:
         pygame.draw.circle(screen, (0,255,0), checkpoint, 3)
 
     for line in car.radar.radar_lines:
         pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
 
-    rotated = pygame.transform.rotate(car_image, car.angle)
-    rect = rotated.get_rect()
-    print(car.position)
-    screen.blit(rotated, car.position)
+    pygame.draw.circle(screen, (255,0,0), (int(car.position.x), int(car.position.y)), car.length)
 
+    print(car.radar.calculate_distance(racetrack))
     pygame.display.flip()
 
     clock.tick(60)
 
-pygame.QUIT()
+
+pygame.quit()

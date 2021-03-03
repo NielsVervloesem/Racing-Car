@@ -1,4 +1,5 @@
 from shapely.geometry import LineString
+import shapely
 import math
 
 class Radar:
@@ -24,14 +25,35 @@ class Radar:
             endpoint = (self.x + math.cos(math.radians(angle - self.car_angle)) * self.radar_length, self.y + math.sin(math.radians(angle - self.car_angle)) * self.radar_length)
             self.radar_lines.append([(self.x, self.y), endpoint])
 
-    def calculate_distance(self, line1, line2):
-        line1 = LineString([radar, endpoint])
-        line2 = LineString([(600,0),(600,400)])
+    def calculate_distance(self, racetrack):
+        distances = []
 
-        intersection = (line1.intersection(line2))
+        innerLine = LineString(racetrack.innerLine)
+        outerline = LineString(racetrack.outerLine)
+        
+        for line in self.radar_lines:
+            line = LineString(line)
+            intersection = (line.intersection(innerLine))
+            
+            #CLEAN UP SOMEDAY
+            if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
+                intersection = intersection[len(intersection)-1]
 
-        if (len(intersection.coords) > 0):
-            distanceLine = LineString([radar,list(intersection.coords)[0]])
-            print("Angle %d = %f" % (angle, distanceLine.length))
-        else:
-            print("Angle %d = too far!" % (angle))
+            if (len(intersection.coords) > 0):
+                distanceLine = LineString([(self.x, self.y),list(intersection.coords)[0]])
+                distances.append(distanceLine.length)
+            else:
+                distances.append(self.radar_length)
+
+            intersection = (line.intersection(outerline))
+            
+            if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
+                intersection = intersection[len(intersection)-1]
+
+            if (len(intersection.coords) > 0):
+                distanceLine = LineString([(self.x, self.y),list(intersection.coords)[0]])
+                distances.append(distanceLine.length)
+            else:
+                distances.append(self.radar_length)
+
+        return distances

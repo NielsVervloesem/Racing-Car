@@ -15,16 +15,6 @@ class Car:
         self.brake_deceleration = 20
         self.free_deceleration = 10
         
-        w = 5
-        h = 10
-        self.body = [
-        (x, y),
-        (x, h),
-        (w, h),
-        (w, y)
-    ]
-
-
         self.acceleration = 0.0
         self.steering = 0.0
 
@@ -43,5 +33,3 @@ class Car:
         self.position += self.velocity.rotate(-self.angle) * dt
         self.angle += degrees(angular_velocity) * dt
         self.radar.updateRadar(self.position.x, self.position.y, self.angle)
-
-

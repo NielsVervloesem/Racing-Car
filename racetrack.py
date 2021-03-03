@@ -1,5 +1,8 @@
 import math
 import random
+from car import Car
+from shapely.geometry import LineString
+
 
 class Racetrack:
     def __init__(self, width, height):
@@ -26,3 +29,22 @@ class Racetrack:
             y3 = (r - 50) * math.sin(a/100)
 
             self.checkpoints.append((int(x3+xOffset),int(y3+yOffset)))
+
+    def hit(self, car):
+        x = car.position.x
+        y = car.position.y
+        lenght = car.length
+        line1 = LineString([(x-lenght, y-lenght),(x+lenght, y-lenght),(x-lenght, y+lenght),(x+lenght, y+lenght)])
+        line2 = LineString(self.innerLine)
+        line3 = LineString(self.outerLine)
+
+        intersection1 = (line1.intersection(line2))
+        intersection2 = (line1.intersection(line3))
+
+        if (len(intersection1.coords) > 0):
+            return True
+
+        if (len(intersection2.coords) > 0):
+            return True
+        
+        return False

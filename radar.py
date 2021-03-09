@@ -1,4 +1,4 @@
-from shapely.geometry import LineString
+from shapely.geometry import LineString, LinearRing
 import shapely
 import math
 
@@ -12,10 +12,6 @@ class Radar:
         self.car_angle = car_angle
         self.updateRadar(self.x, self.y, self.car_angle)
 
-        '''
-        radar_len = 175
-        angles = (15, -15 ,45 ,-45 ,180)
-        '''
     def updateRadar(self, x, y, car_angle):
         self.car_angle = car_angle
         self.x = x
@@ -25,15 +21,16 @@ class Radar:
             endpoint = (self.x + math.cos(math.radians(angle - self.car_angle)) * self.radar_length, self.y + math.sin(math.radians(angle - self.car_angle)) * self.radar_length)
             self.radar_lines.append([(self.x, self.y), endpoint])
 
+    #REFACTOR THIS@@
     def calculate_distance(self, racetrack):
         distances = []
 
-        innerLine = LineString(racetrack.innerLine)
-        outerline = LineString(racetrack.outerLine)
+        inner_line = LinearRing(racetrack.inner_line)
+        outer_line = LinearRing(racetrack.outer_line)
         
         for line in self.radar_lines:
             line = LineString(line)
-            intersection = (line.intersection(innerLine))
+            intersection = (line.intersection(inner_line))
             
             #CLEAN UP SOMEDAY
             if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
@@ -45,7 +42,7 @@ class Radar:
             else:
                 distances.append(self.radar_length)
 
-            intersection = (line.intersection(outerline))
+            intersection = (line.intersection(outer_line))
             
             if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
                 intersection = intersection[len(intersection)-1]
@@ -56,4 +53,47 @@ class Radar:
             else:
                 distances.append(self.radar_length)
 
-        return distances
+        realDistances = []
+
+        #ugly code :@
+        if(distances[0] > distances[1]):
+            realDistances.append(distances[1])
+        else:
+            realDistances.append(distances[0])
+
+        if(distances[2] > distances[3]):
+            realDistances.append(distances[3])
+        else:
+            realDistances.append(distances[2])
+
+        if(distances[4] > distances[5]):
+            realDistances.append(distances[5])
+        else:
+            realDistances.append(distances[4])
+
+        if(distances[6] > distances[7]):
+            realDistances.append(distances[7])
+        else:
+            realDistances.append(distances[6])
+
+        if(distances[8] > distances[9]):
+            realDistances.append(distances[9])
+        else:
+            realDistances.append(distances[8])
+    
+        if(distances[10] > distances[11]):
+            realDistances.append(distances[11])
+        else:
+            realDistances.append(distances[10])
+
+        if(distances[12] > distances[13]):
+            realDistances.append(distances[13])
+        else:
+            realDistances.append(distances[12])
+
+        if(distances[14] > distances[15]):
+            realDistances.append(distances[15])
+        else:
+            realDistances.append(distances[14])
+
+        return realDistances

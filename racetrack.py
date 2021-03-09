@@ -1,45 +1,58 @@
 import math
 import random
 from car import Car
-from shapely.geometry import LineString
-
+from shapely.geometry import LineString, LinearRing
+import shapely
 
 class Racetrack:
-    def __init__(self, width, height):
-        self.outerLine = []
-        self.innerLine = []
+    def __init__(self, width, height, racetrack_width):
+        self.outer_line = []
+        self.inner_line = []
         self.checkpoints = []
+        self.racetrack_width = racetrack_width
 
-        xOffset = width / 2
-        yOffset = height / 2
+        self.passed = []
+
+        for i in range(30):
+            self.passed.append(10000)
+
+        x_offset = width / 2
+        y_offset = height / 2
 
         for a in range(0, 628, 50):
             r = random.randint(200, (height / 2) - 10)
 
             x1 = r * math.cos(a/100)
             y1 = r * math.sin(a/100)
-            self.outerLine.append((x1 + xOffset , y1 + yOffset))
+            self.outer_line.append((x1 + x_offset , y1 + y_offset))
 
-            x2 = (r - 100) * math.cos(a/100)
-            y2 = (r - 100) * math.sin(a/100)
+            x2 = (r - self.racetrack_width) * math.cos(a/100)
+            y2 = (r - self.racetrack_width) * math.sin(a/100)
 
-            self.innerLine.append((x2 + xOffset , y2 + yOffset))
+            self.inner_line.append((x2 + x_offset , y2 + y_offset))
             
-            x3 = (r - 50) * math.cos(a/100)
-            y3 = (r - 50) * math.sin(a/100)
+            x3 = (r - int(self.racetrack_width/2)) * math.cos(a/100)
+            y3 = (r - int(self.racetrack_width/2)) * math.sin(a/100)
 
-            self.checkpoints.append((int(x3+xOffset),int(y3+yOffset)))
+            self.checkpoints.append((int(x3+x_offset),int(y3+y_offset)))
 
     def hit(self, car):
         x = car.position.x
         y = car.position.y
         lenght = car.length
+
         line1 = LineString([(x-lenght, y-lenght),(x+lenght, y-lenght),(x-lenght, y+lenght),(x+lenght, y+lenght)])
-        line2 = LineString(self.innerLine)
-        line3 = LineString(self.outerLine)
+        line2 = LinearRing(self.inner_line)
+        line3 = LinearRing(self.outer_line)
 
         intersection1 = (line1.intersection(line2))
         intersection2 = (line1.intersection(line3))
+
+        if(isinstance(intersection1, shapely.geometry.multipoint.MultiPoint)):
+                intersection1 = intersection1[len(intersection1)-1]
+                
+        if(isinstance(intersection2, shapely.geometry.multipoint.MultiPoint)):
+            intersection2 = intersection2[len(intersection2)-1]
 
         if (len(intersection1.coords) > 0):
             return True

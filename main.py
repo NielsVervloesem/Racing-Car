@@ -12,10 +12,11 @@ import pickle
 import random
 global generation
 
+
 def run(genomes, config):
     networks = []
     cars = []
-    racetrack = Racetrack(width, height, random.randint(75,150))
+    racetrack = Racetrack(width, height, random.randint(120,150))
 
     car_x = racetrack.checkpoints[0][0]
     car_y = racetrack.checkpoints[0][1]
@@ -46,11 +47,38 @@ def run(genomes, config):
         #Loop cars and make them drive
         for index, car in enumerate(cars):
             if(car.is_alive):
+                print(car.radar.calculate_distance(racetrack))
                 output = networks[index].activate(car.radar.calculate_distance(racetrack))
-                car.velocity[0] = output[0] * 15
-                car.steering = output[1] * 15
+                car.velocity[0] = output[0] % 20
+                bla = output[1] % 360
+
+                if(bla > 180+45):
+                    bla = 180+45
+                if(bla < 180-45):
+                    bla = 180-45
+
+                car.steering = bla
                 car.update(dt)
 
+                '''
+                print(output)
+                if(output[0] > 0):
+                    car.velocity[0] = car.velocity[0] + 1
+                else:
+                    car.velocity[0] = car.velocity[0] - 1
+
+                max_steering = 10
+                if(output[1] > 0):
+                    if(car.steering > max_steering):
+                        car.steering = max_steering
+                    else:
+                        car.steering = car.steering + 1
+                else:
+                    if(car.steering < -max_steering):
+                        car.steering = -max_steering
+                    else:
+                        car.steering = car.steering - 1
+                '''
                 #Kill off bad cars
                 if (racetrack.hit(car)):
                     car.is_alive = False
@@ -94,11 +122,12 @@ def run(genomes, config):
         textsurface = myfont.render(("Best car"), False, (255, 255, 255))
         screen.blit(textsurface,(0,40))
 
-        textsurface = myfont.render(("Speed"+str(output[0])), False, (255, 255, 255))
+        textsurface = myfont.render(("Output 1 (speed): "+str(output[0]%20)), False, (255, 255, 255))
         screen.blit(textsurface,(0,60))
         
-        textsurface = myfont.render(("Steering angle: "+str(output[1])), False, (255, 255, 255))
+        textsurface = myfont.render(("Output 2 (angle): "+str(bla-180)), False, (255, 255, 255))
         screen.blit(textsurface,(0,80))
+
 
     
         #if all cars are dead, break out loop and go to next generation
@@ -134,11 +163,11 @@ population.add_reporter(neat.StdOutReporter(True))
 stats = neat.StatisticsReporter()
 population.add_reporter(stats)
 
-population.add_reporter(neat.Checkpointer(5, 3600, "models/checkpoint"))
+#population.add_reporter(neat.Checkpointer(5, 3600, "models/checkpoint"))
 generation = 0
 
 #Run NEAT
-model = population.run(run, 10)
+model = population.run(run, 100)
 
 with open("models/" + time.strftime("%d%m%Y-%H%M%S") + ".pkl", "wb") as f:
     pickle.dump(model, f)

@@ -15,7 +15,8 @@ class Car:
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
         self.length = length
-        self.max_velocity = 50
+        self.max_velocity = 20
+        self.max_steering = 45
         self.brake_deceleration = 20
         self.free_deceleration = 10
         self.acceleration = 0.0
@@ -50,7 +51,7 @@ class Car:
 
     #update the car pos and angle
     def update(self, dt): 
-        self.velocity += (self.acceleration * dt, 0)
+        #self.velocity += (self.acceleration * dt, 0)
         self.velocity.x = max(-self.max_velocity, min(self.velocity.x, self.max_velocity))
 
         if self.steering:

@@ -96,4 +96,8 @@ class Radar:
         else:
             realDistances.append(distances[14])
 
-        return realDistances
+        rds = []
+        for rd in realDistances:
+            rds.append(rd / 120)
+            
+        return rds

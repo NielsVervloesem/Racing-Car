@@ -10,7 +10,7 @@ def calculate_distance(x1,y1,x2,y2):
 
 
 class Car:
-    def __init__(self, id, x, y, angle=-90, length=10):
+    def __init__(self, name, x, y, angle=-90, length=10):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
@@ -21,9 +21,9 @@ class Car:
         self.free_deceleration = 10
         self.acceleration = 0.0
         self.steering = 0.0
-        self.id = id
+        self.name = name
 
-        self.time_alive = 200
+        self.time_alive = 150
         self.checkpoint_passed = 1
 
         self.radar = Radar(x, y, 120, (-45, -15,-90, 0, 15, 45, 90, 180), self.angle)

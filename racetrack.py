@@ -13,7 +13,7 @@ class Racetrack:
 
         self.passed = []
 
-        for i in range(30):
+        for i in range(100):
             self.passed.append(10000)
 
         x_offset = width / 2

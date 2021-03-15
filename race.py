@@ -24,6 +24,7 @@ screen.fill(background_colour)
 pygame.display.flip()
 clock = pygame.time.Clock()
 
+random.seed(17)
 racetrack = Racetrack(width, height, random.randint(150,180))
 car_x = racetrack.checkpoints[0][0]
 car_y = racetrack.checkpoints[0][1]
@@ -124,7 +125,7 @@ for i in range(100):
                 if remain == 0:
                     run = False
 
-                car.check_passed(racetrack)
+                #car.check_passed(racetrack)
                 if(car.checkpoint_passed == 35):
                     car.is_alive = False
                     run = False

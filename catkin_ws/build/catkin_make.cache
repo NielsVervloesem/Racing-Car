@@ -1,0 +1,2 @@
+first_package
+-DCATKIN_DEVEL_PREFIX=/home/niels/Desktop/stage/ros/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/niels/Desktop/stage/ros/catkin_ws/install -G Unix Makefiles

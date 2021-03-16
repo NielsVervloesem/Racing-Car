@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="debug" default="1"/>
+
+    <node pkg="murphy" type="ai.py" name="ai_node" output="screen" cwd="node"/>
+	    <param name="debug" value="$(arg debug)"/>
+    <node pkg="murphy" type="gui.py" name="gui_node" output="screen" cwd="node"/>
+	    <param name="debug" value="$(arg debug)"/>
+    <node pkg="murphy" type="pilot.py" name="pilot_node" output="screen" cwd="node"/>
+	    <param name="debug" value="$(arg debug)"/>
+    <node pkg="murphy" type="sensor.py" name="sensor_node" output="screen" cwd="node"/>
+	    <param name="debug" value="$(arg debug)"/>
+
+</launch>

@@ -192,7 +192,7 @@ def draw_net(config, genome, view=False, filename=None, node_names=None, show_di
             width = str(0.1 + abs(cg.weight / 5.0))
             dot.edge(a, b, _attributes={'style': style, 'color': color, 'penwidth': width})
 
-    filename = "diagram/" + filename
+    filename = 'diagram/' + filename
     dot.render(filename, view=view)
 
     return dot

@@ -36,6 +36,9 @@ class Racetrack:
 
             self.checkpoints.append((int(x3+x_offset),int(y3+y_offset)))
 
+    def invertCheckpoints(self):
+        self.checkpoints = self.checkpoints[::-1]
+        
     def hit(self, car):
         x = car.position.x
         y = car.position.y

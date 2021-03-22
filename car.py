@@ -8,7 +8,6 @@ def calculate_distance(x1,y1,x2,y2):
     distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return distance
 
-
 class Car:
     def __init__(self, name, x, y, angle=-90, length=10):
         self.position = Vector2(x, y)
@@ -31,6 +30,12 @@ class Car:
         self.is_alive = True
         self.score = 200
     
+    def switchAngle(self):
+        if(self.angle == -90):
+            self.angle = 90
+        else:
+            self.angle = -90
+            
     #When passing a checkpoint of the racetrack, reward the car with a bonus
     #First one to pass will get the max bonus, second one will recieve 500 points less
     def check_passed(self, racetrack):

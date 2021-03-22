@@ -1,0 +1,18 @@
+digraph {
+	node [fontsize=9 height=0.2 shape=circle width=0.2]
+	-1 [fillcolor=lightgray shape=box style=filled]
+	-2 [fillcolor=lightgray shape=box style=filled]
+	-3 [fillcolor=lightgray shape=box style=filled]
+	-4 [fillcolor=lightgray shape=box style=filled]
+	-5 [fillcolor=lightgray shape=box style=filled]
+	-6 [fillcolor=lightgray shape=box style=filled]
+	-7 [fillcolor=lightgray shape=box style=filled]
+	-8 [fillcolor=lightgray shape=box style=filled]
+	Speed [fillcolor=lightblue style=filled]
+	Angle [fillcolor=lightblue style=filled]
+	-1 -> Angle [color=green penwidth=0.9610311174488343 style=solid]
+	-2 -> Angle [color=green penwidth=0.5912704205036251 style=solid]
+	-6 -> Angle [color=red penwidth=1.1450414696248608 style=solid]
+	-3 -> Speed [color=green penwidth=0.23451900070954132 style=solid]
+	-5 -> Speed [color=green penwidth=0.38945993993326655 style=solid]
+}

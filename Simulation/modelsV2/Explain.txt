@@ -1,0 +1,87 @@
+Model name = Model + input + output + version
+
+
+
+Model321
+3 input (-15,0,15) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 20
+
+Model322
+3 input (-15,0,15) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 40
+
+Model323
+3 input (-15,0,15) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 60
+
+Model521
+5 input (-40,-15,0,15,40) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 20
+
+Model522
+5 input (-40,-15,0,15,40) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 40
+
+Model523
+5 input (-40,-15,0,15,40) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 60
+
+Model721
+7 input (-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 20
+
+Model722
+7 input (-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 40
+
+Model723
+7 input (-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 60
+
+Model821
+8 input (180,-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 20
+
+Model822
+8 input (180,-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 [-1,1])
+Max speed car = 40
+
+Model823
+8 input (180,-90,-40,-15,0,15,40,90) [0,1]
+0 hidden
+2 outputs (speed, angle)
+sigmoid (speed [0-1], angle * 2 -1 = [-1,1])
+Max speed car = 60

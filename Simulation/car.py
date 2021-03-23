@@ -25,7 +25,7 @@ class Car:
         self.time_alive = 150
         self.checkpoint_passed = 1
 
-        self.radar = Radar(x, y, 120, (-45, -15,-90, 0, 15, 45, 90, 180), self.angle)
+        self.radar = Radar(x, y, 120, (180, -90, -40, -15, 0, 15, 40, 90), self.angle)
 
         self.is_alive = True
         self.score = 200

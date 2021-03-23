@@ -18,7 +18,7 @@ global generation
 def run(genomes, config):
     networks = []
     cars = []
-    racetrack = Racetrack(width, height, random.randint(130,150))
+    racetrack = Racetrack(width, height, random.randint(50,180))
 
     car_x = racetrack.checkpoints[0][0]
     car_y = racetrack.checkpoints[0][1]
@@ -44,21 +44,35 @@ def run(genomes, config):
     dt = 0.17
     run = True
     while run:
+        '''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
-
+        '''
         #Draw racetrack
+        '''
         pygame.draw.lines(screen, (255,255,255), True, racetrack.outer_line)
         pygame.draw.lines(screen, (255,255,255), True, racetrack.inner_line)
 
         for checkpoint in racetrack.checkpoints:
             pygame.draw.circle(screen, (0,255,0), checkpoint, 3)
-
+        '''
         #Loop cars and make them drive
         for index, car in enumerate(cars):
             if(car.is_alive):
-                output = networks[index].activate(car.radar.calculate_distance(racetrack))
+                #180, -90, -40, -15, 0, 15, 40, 90
+                bla = car.radar.calculate_distance(racetrack)
+                aaa = []
+                aaa.append(bla[0])
+                aaa.append(bla[1])
+                aaa.append(bla[2])
+                aaa.append(bla[3])
+                aaa.append(bla[4]) #MID
+                aaa.append(bla[5])
+                aaa.append(bla[6])
+                aaa.append(bla[7])
+
+                output = networks[index].activate(aaa)
 
                 if(len(output) > 2):
                     softmax_result = softmax(output)
@@ -132,28 +146,23 @@ def run(genomes, config):
                     car.is_alive = False
                 
                 #Draw each cars (no radar lines because of lag)
-                
+                '''
                 for line in car.radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
                 
                 pygame.draw.circle(screen, (255,0,0), (int(car.position.x), int(car.position.y)), car.length)
-
+                '''
         #Update car fitness
         remain_cars = 0
-        best_car_score = genomes[0][1].fitness
-        best_car_index = 0
         for i, car in enumerate(cars):
             if(car.is_alive):
                 remain_cars += 1
                 score = car.check_passed(racetrack)
                 genomes[i][1].fitness += car.update_score() + score
-                if(genomes[i][1].fitness > best_car_score):
-                    best_car_score = genomes[i][1].fitness
-                    best_car_index = i
-        
-        output = networks[best_car_index].activate(cars[best_car_index].radar.calculate_distance(racetrack))
 
+        
         #update screen with best car information
+        '''
         textsurface = myfont.render(("Generation: "+str(generation)), False, (255, 255, 255))
         screen.blit(textsurface,(0,0))
 
@@ -168,19 +177,22 @@ def run(genomes, config):
         
         textsurface = myfont.render(("Angle: "+str(cars[best_car_index].steering)), False, (255, 255, 255))
         screen.blit(textsurface,(0,120)) 
-
+        '''
         #if all cars are dead, break out loop and go to next generation
         if remain_cars == 0:
             break
         
         #update screen
+        '''
         pygame.display.update()
         screen.fill(background_colour)
         clock.tick(60)
-
+        '''
 #Pygame init
-background_colour = (0,0,0)
 (width, height) = (800, 800)
+
+'''
+background_colour = (0,0,0)
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Murphy simulation')
@@ -190,7 +202,7 @@ myfont = pygame.font.SysFont('Comic Sans MS', 20)
 screen.fill(background_colour)
 pygame.display.flip()
 clock = pygame.time.Clock()
-
+'''
 #NEAT init
 config_path = "./config-feedforward.txt"
 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
@@ -206,8 +218,10 @@ population.add_reporter(stats)
 generation = 0
 
 #Run NEAT
-model = population.run(run, 100)
+model = population.run(run, 1250)
 
-with open("models/" + time.strftime("%d%m%Y-%H%M%S") + "22.pkl", "wb") as f:
+name = "Model821"
+
+with open("modelsV2/" + name + ".pkl", "wb") as f:
     pickle.dump(model, f)
     f.close()

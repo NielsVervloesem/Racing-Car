@@ -14,13 +14,14 @@ class Car:
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
         self.length = length
-        self.max_velocity = 20
+        self.max_velocity = 60
         self.max_steering = 45
         self.brake_deceleration = 20
         self.free_deceleration = 10
         self.acceleration = 0.0
         self.steering = 0.0
         self.name = name
+        self.prevSteering = 0
 
         self.time_alive = 150
         self.checkpoint_passed = 1
@@ -33,26 +34,28 @@ class Car:
     def switchAngle(self):
         if(self.angle == -90):
             self.angle = 90
+            self.radar.car_angle = 90
         else:
             self.angle = -90
-            
+            self.radar.car_angle = -90
+
     #When passing a checkpoint of the racetrack, reward the car with a bonus
     #First one to pass will get the max bonus, second one will recieve 500 points less
     def check_passed(self, racetrack):
         check = racetrack.checkpoints[self.checkpoint_passed % 13]
         current_distance = calculate_distance(self.position.x, self.position.y, check[0], check[1])
-
         if(current_distance < racetrack.racetrack_width):
             self.checkpoint_passed = self.checkpoint_passed + 1
             score = racetrack.passed[self.checkpoint_passed] + 1
-            racetrack.passed[self.checkpoint_passed] -= 500
-            self.time_alive += 100
+            racetrack.passed[self.checkpoint_passed] -= 1
+            self.time_alive = 150
             return score
         return 0
 
     #Being alive is good, small reward
     def update_score(self):
         return 1
+        #return - (90 - abs(self.steering + 45 - self.prevSteering + 45))
 
     #update the car pos and angle
     def update(self, dt): 

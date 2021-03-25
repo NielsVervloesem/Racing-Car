@@ -10,6 +10,7 @@ import math
 import os
 from neat.math_util import softmax
 import numpy as np
+import visualize
 
 #Pygame init
 background_colour = (0,0,0)
@@ -25,12 +26,12 @@ pygame.display.flip()
 clock = pygame.time.Clock()
 
 random.seed(17)
-racetrack = Racetrack(width, height, random.randint(150,180))
+racetrack = Racetrack(width, height, random.randint(100,120))
 car_x = racetrack.checkpoints[0][0]
 car_y = racetrack.checkpoints[0][1]
 
 #red, green, blue, yellow, cyan, pink
-colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255),(255,0,255)]
+colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255),(255,0,255), (255,0,255),(255,0,255),(255,0,255),(255,0,255),(255,0,255),(255,0,255)]
 modelName = []
 
 networks = []
@@ -39,8 +40,8 @@ cars = []
 for filename in os.listdir("race"):
     if(filename.endswith("pkl")):
         filename = filename[:-4]
-        model_path = "race/" + filename + ".pkl"
-        config_file = "race/" + filename + ".txt"
+        model_path = "ModelsV2/" + filename + ".pkl"
+        config_file = "ModelsV2/" + filename + ".txt"
 
         with open(model_path, "rb") as f:
             winner = pickle.load(f)
@@ -54,6 +55,8 @@ for filename in os.listdir("race"):
         networks.append(winner_model)
         cars.append(Car(filename, car_x, car_y))
         modelName.append(filename)
+        nodes = {0:'Speed',1:'Angle'}
+        visualize.draw_net(config, winner, True,node_names=nodes, filename="test")
 
 dt = 0.17
 run = True
@@ -75,7 +78,23 @@ for i in range(100):
         #Loop cars and make them drive
         for index, car in enumerate(cars):
             if(car.is_alive):
-                output = networks[index].activate(car.radar.calculate_distance(racetrack))
+                #180, -90, -40, -15, 0, 15, 40, 90
+                sensors = car.radar.calculate_distance(racetrack)
+                inputdata = []
+
+                if(int(car.name[5]) > 7):
+                    inputdata.append(sensors[0])
+                if(int(car.name[5]) > 5):
+                    inputdata.append(sensors[1])
+                    inputdata.append(sensors[7])
+                if(int(car.name[5]) > 3):
+                    inputdata.append(sensors[2])
+                    inputdata.append(sensors[6])
+                inputdata.append(sensors[3])
+                inputdata.append(sensors[4]) #MID
+                inputdata.append(sensors[5])
+
+                output = networks[index].activate(inputdata)
 
                 if(len(output) > 2):
                     softmax_result = softmax(output)
@@ -114,7 +133,7 @@ for i in range(100):
                             car.steering = car.steering - 45
                 else:
                     car.velocity[0] = output[0] * 20
-                    car.steering = output[1] * 45
+                    car.steering = output[1] * 90 - 45
                 car.update(dt)
 
                 #Kill off bad cars
@@ -131,8 +150,10 @@ for i in range(100):
                     run = False
                 
                 #Draw each cars (no radar lines because of lag)
+                """
                 for line in car.radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
+                """
                 
                 pygame.draw.circle(screen, colors[index], (int(car.position.x), int(car.position.y)), car.length)
 
@@ -158,25 +179,3 @@ for i in range(100):
 
     networks = []
     cars = []
-
-    for filename in os.listdir("race"):
-        if(filename.endswith("pkl")):
-            filename = filename[:-4]
-            model_path = "race/" + filename + ".pkl"
-            config_file = "race/" + filename + ".txt"
-
-            with open(model_path, "rb") as f:
-                winner = pickle.load(f)
-
-            config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                                    neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                                    config_file)
-
-            winner_model = neat.nn.FeedForwardNetwork.create(winner, config)
-
-            networks.append(winner_model)
-            cars.append(Car(filename, car_x, car_y))
-            modelName.append(filename)
-    
-        
-

@@ -12,10 +12,15 @@ import os
 
 drawRacetrack =  True
 carspeed = 20 * 1
-carname = 5
-model_path = 'MurphyModels\\ModelZonderRange7.pkl'
-config_file = 'MurphyModels\\ModelZonderRange7.txt'
-racetrack_file = 'modelsV3\\racketrack.pkl'
+carname = 8
+model_path = 'Models\Model.pkl'
+config_file = 'Models\Model.txt'
+racetrack_file = 'racetracks\\racketrack.pkl'
+
+with open(racetrack_file, "wb") as f:
+    pickle.dump(racetrack, f)
+    f.close()
+    
 #Pygame init
 background_colour = (0,0,0)
 (width, height) = (1500, 1000)
@@ -30,7 +35,7 @@ pygame.display.flip()
 clock = pygame.time.Clock()
 
 racetrack = Racetrack(width, height, random.randint(160,170))
-
+a = 0
 if(not drawRacetrack):
     with open(racetrack_file, "rb") as f:
         racetrack = pickle.load(f)
@@ -48,9 +53,6 @@ winner_model = neat.nn.FeedForwardNetwork.create(winner, config)
 nodes = {0:'Speed',1:'Angle'}
 visualize.draw_net(config, winner, True,node_names=nodes, filename="test")
 
-
-
-
 if(drawRacetrack):
     racetrack.inner_line = []
     racetrack.outer_line = []
@@ -65,7 +67,11 @@ if(drawRacetrack):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     drawRacetrack = False
+                if event.key == pygame.K_LEFT:
+                    racetrack.inner_line = racetrack.inner_line[:-1]
+
         if(len(racetrack.inner_line) > 2):
+            screen.fill((0,0,0))
             pygame.draw.lines(screen, (255,255,255), False, racetrack.inner_line)
             pygame.display.flip()
 
@@ -80,7 +86,11 @@ if(drawRacetrack):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     drawRacetrack = False
+                if event.key == pygame.K_LEFT:
+                    racetrack.outer_line = racetrack.outer_line[:-1]
         if(len(racetrack.outer_line) > 2):
+            screen.fill((0,0,0))
+            pygame.draw.lines(screen, (255,255,255), False, racetrack.inner_line)
             pygame.draw.lines(screen, (255,255,255), False, racetrack.outer_line)
             pygame.display.flip()
 
@@ -95,21 +105,38 @@ if(drawRacetrack):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     drawRacetrack = False
+                if event.key == pygame.K_LEFT:
+                    racetrack.checkpoints = racetrack.checkpoints[:-1]
+            if(len(racetrack.checkpoints) >= 2 and len(racetrack.checkpoints) % 2 == 0):
+                for i in range(0,len(racetrack.checkpoints),2):
+                    print(i)
+                    screen.fill((0,0,0))
 
-            for checkpoint in racetrack.checkpoints:
-                pygame.draw.circle(screen, (0,255,0), checkpoint, 3) 
-                pygame.display.flip()
+                    pygame.draw.lines(screen, (255,255,255), False, racetrack.inner_line)
+                    pygame.draw.lines(screen, (255,255,255), False, racetrack.outer_line)
+                    p1 = (int(racetrack.checkpoints[i][0]),int(racetrack.checkpoints[i][1]))
+                    p2 = (int(racetrack.checkpoints[i+1][0]),int(racetrack.checkpoints[i+1][1]))
+                    pygame.draw.line(screen, (0,255,0), p1, p2, 3)                    
+                    pygame.display.flip()
 
+    drawRacetrack =  True
+    while(drawRacetrack):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                racetrack.start[0] = (pos)
+                drawRacetrack = False
 
 with open(racetrack_file, "wb") as f:
     pickle.dump(racetrack, f)
     f.close()
 
-print(racetrack.checkpoints)  
-
-car_x = racetrack.checkpoints[0][0]
-car_y = racetrack.checkpoints[0][1]
-car = Car(carname,car_x, car_y)
+print(racetrack.start)
+car_x = racetrack.start[0][0]
+car_y = racetrack.start[0][1]
+car = Car(carname,car_x, car_y,120)
 
 with open(model_path, "rb") as f:
     winner = pickle.load(f)
@@ -145,8 +172,8 @@ while run:
         inputdata.append(sensors[4]) #0
         inputdata.append(sensors[5]) #15
 
-        #if(int(car.name) > 3):
-            #inputdata.append(sensors[7]) #40
+        if(int(car.name) > 3):
+            inputdata.append(sensors[7]) #40
         if(int(car.name) > 5):
             inputdata.append(sensors[7]) #90
 
@@ -190,8 +217,13 @@ while run:
                 if(car.steering > -45):
                     car.steering = car.steering - 45
         else:
-            car.velocity[0] = output[0] * carspeed
-            car.steering = output[1] * 90 - 45
+            car.velocity[0] = 0 #output[0] * carspeed
+            if(a == 0):
+                a = 1
+                car.steering = 45#output[1] * 90 - 45            
+            if(a == 1):
+                a = 0
+                car.steering = -45#output[1] * 90 - 45
         car.update(dt)
 
         #Kill off bad cars
@@ -211,6 +243,6 @@ while run:
     
     #update screen
     pygame.display.update()
-    screen.fill(background_colour)
+    #screen.fill(background_colour)
     clock.tick(60)
     time.sleep(0.1)

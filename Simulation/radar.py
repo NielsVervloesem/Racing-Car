@@ -98,6 +98,6 @@ class Radar:
 
         rds = []
         for rd in realDistances:
-            rds.append(rd / 120)
+            rds.append(rd / self.radar_length)
             
         return rds

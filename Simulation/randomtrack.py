@@ -66,7 +66,7 @@ def draw_regular_polygon(surface, color, vertex_count, radius, position):
         for i in range(n)
     ],1)
 
-    returns corners
+    return corners
 
 def isRepeat(grid, x,y):
     threshold = 3
@@ -133,6 +133,8 @@ for piece in grid2:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit(0)
+
+
 innerlines = []
 outerlines = []
 for i in range(len(grid2)):

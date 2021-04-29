@@ -1,6 +1,7 @@
 import pygame
 import os
 from racetrack import Racetrack
+from randomtrack import RandomRacetrack
 from car import Car
 from math import sin, radians, degrees, copysign
 import time
@@ -23,37 +24,22 @@ racetrack_file = 'modelsV3\\racketrackV1.pkl'
 
 def run(genomes, config):
     global racetrack
-    global racetracks
-    global invertRandom
     global radar_lenght
-    radar_lenght = 120
+    radar_lenght = 60
     counter = 0
 
     networks = []
     cars = []
-    '''
-    if(not drawRacetrack):
-        with open(racetrack_file, "rb") as f:
-            racetrack = pickle.load(f)
-    else:
-        racetrack = Racetrack(width, height, random.randint(150,200))
-    '''
+    racetrack = RandomRacetrack(width, height, 30)
 
-    racetrack = racetracks[counter]
-    jump = 10
-
-    car_x = int(racetrack.start[0][0])
-    car_y = int(racetrack.start[0][1])
+    car_x = int(racetrack.start[0])
+    car_y = int(racetrack.start[1])
 
     for id, genome in genomes:
         network = neat.nn.FeedForwardNetwork.create(genome, config)
         networks.append(network)
         genome.fitness = 0
-        car = Car(carSensors, car_x, car_y, radar_lenght)
-        '''
-        if(invertRandom == 1):
-            car.switchAngle()
-        '''
+        car = Car(carSensors, car_x, car_y, radar_lenght, racetrack.startAngle)
         cars.append(car)
 
 
@@ -68,21 +54,25 @@ def run(genomes, config):
                 sys.exit(0)
         
         #Draw racetrack
-        
-        pygame.draw.lines(screen, (255,255,255), True, racetrack.outer_line)
-        pygame.draw.lines(screen, (255,255,255), True, racetrack.inner_line)
+              
+        for line in racetrack.innerHitLine:
+            pygame.draw.lines(screen, (255,0,0), False, line,2)
+
+
+        for line in racetrack.outerHitLine:
+            pygame.draw.lines(screen, (255,0,0), False, line,2)
         
         colorOffset = 0
         for i in range(0,len(racetrack.checkpoints),2):
             p1 = (int(racetrack.checkpoints[i][0]),int(racetrack.checkpoints[i][1]))
             p2 = (int(racetrack.checkpoints[i+1][0]),int(racetrack.checkpoints[i+1][1]))
-            pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 3)    
+            pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 1)    
             colorOffset = colorOffset + 5
         
         for index, car in enumerate(cars):
             if(car.is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
-                sensors = car.radar.calculate_distance(racetrack)
+                sensors = car.radar.calculate_distance(racetrack) 
                 inputdata = []
 
                 #Collect the correct amount of sensors data
@@ -153,56 +143,38 @@ def run(genomes, config):
                     car.is_alive = False
 
 
-                if(car.checkpoint_passed > 1):# len(racetrack.checkpoints)):
-                    counter = counter + 1
-                    if(counter > (len(racetracks)-1)):
-                        radar_lenght = radar_lenght - 5
-                        print(radar_lenght)
-                        counter = 0
-                        #FIX THIS
-                    screen.fill(background_colour)
-                    '''
-                    if(invertRandom == 1):
-                        invertRandom = 0
-                    else:
-                        invertRandom = 1
-                    '''
-                    racetrack = racetracks[counter]
-                    #racetrack = Racetrack(width, height, random.randint(100,200))
-                    '''
-                    if(invertRandom == 1):
-                        racetrack.invertCheckpoints()
-                    '''
-                    jump = jump #+ jump
+                if(car.checkpoint_passed == len(racetrack.checkpoints)):
 
+                    screen.fill(background_colour)
+                    pygame.display.update()
+
+                    racetrack = RandomRacetrack(width, height, 4)
+            
                     for c in cars:
                         if(car.is_alive):
-                            c.position[0] = racetrack.start[0][0]
-                            c.position[1] = racetrack.start[0][1]
-                            c.checkpoint_passed = 0
-                            c.radar.x = racetrack.start[0][0]
-                            c.radar.y = racetrack.start[0][1]
+                            c.position[0] = int(racetrack.start[0])
+                            c.position[1] = int(racetrack.start[1])
+                            c.checkpoint_passed = 2
+                            c.radar.x = int(racetrack.start[0])
+                            c.radar.y = int(racetrack.start[1])
                             c.steering = 0
                             c.velocity.x = 0
                             c.angle = -90
                             c.radar.car_angle = -90
                             c.radar.radar_length = radar_lenght
 
-                            c.radar.updateRadar(racetrack.start[0][0], racetrack.start[0][1], -90)
+                            c.radar.updateRadar(int(racetrack.start[0]), int(racetrack.start[1]), -90)
                             c.time = c.time
                             c.time_alive = c.time
 
-                            '''
-                            if(invertRandom == 1):
-                                car.switchAngle()
-                                c.radar.updateRadar(racetrack.start[0][0], racetrack.start[0][1], 90)
-                            '''
+                    
+                '''           
                 #Draw each cars (no radar lines because of lag)
                 for line in car.radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
                 
                 pygame.draw.circle(screen, (255,0,0), (int(car.position.x), int(car.position.y)), car.length)
-            
+                '''
         #Update car fitness
         remain_cars = 0
         for i, car in enumerate(cars):
@@ -242,7 +214,7 @@ def run(genomes, config):
         clock.tick(60)
         
 #Pygame init
-(width, height) = (1500, 1000)
+(width, height) = (1000, 1000)
 background_colour = (0,0,0)
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Murphy simulation')
@@ -268,20 +240,8 @@ generation = 0
 
 #Run NEAT
 global racetrack
-racetrack = Racetrack(width, height, random.randint(150,200))
-global racetracks
-racetracks = []
+racetrack = RandomRacetrack(width, height, 2)
 global radar_lenght
-
-for filename in os.listdir("racetracks"):
-    path = "racetracks/" + filename
-    with open(path, "rb") as f:
-        track = pickle.load(f)
-        racetracks.append(track)
-    
-global invertRandom
-invertRandom = 0
-
 model = population.run(run, 200)
 
 with open(name + ".pkl", "wb") as f:

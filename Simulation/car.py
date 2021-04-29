@@ -13,7 +13,7 @@ def calculate_distance(x1,y1,x2,y2):
     return distance
 
 class Car:
-    def __init__(self, name, x, y, radar_length, angle=-90, length=10):
+    def __init__(self, name, x, y, radar_length, angle=-90, length=3):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
@@ -26,10 +26,10 @@ class Car:
         self.steering = 0.0
         self.name = name
         self.prevSteering = 0
-        self.time = 100
+        self.time = 15
 
         self.time_alive = self.time
-        self.checkpoint_passed = 0
+        self.checkpoint_passed = 2
 
         self.radar = Radar(x, y, radar_length, (180, -90, -40, -15, 0, 15, 40, 90), self.angle)
 
@@ -48,9 +48,8 @@ class Car:
     #First one to pass will get the max bonus, second one will recieve 500 points less
     def check_passed(self, racetrack):
         score = 0   
-
-        check1 = racetrack.checkpoints[self.checkpoint_passed % len(racetrack.checkpoints)]
-        check2 = racetrack.checkpoints[self.checkpoint_passed % len(racetrack.checkpoints) + 1]
+        check1 = racetrack.checkpoints[self.checkpoint_passed]#self.checkpoint_passed % len(racetrack.checkpoints)]
+        check2 = racetrack.checkpoints[self.checkpoint_passed+1]#self.checkpoint_passed % len(racetrack.checkpoints) + 1]
 
         x = self.position.x
         y = self.position.y
@@ -63,6 +62,7 @@ class Car:
                 intersection1 = intersection1[len(intersection1)-1]
 
         if(len(intersection1.coords) == 1):
+            print("PASSED")
             self.checkpoint_passed = self.checkpoint_passed + 2
             score = self.time_alive + 900
             self.time_alive = 100
@@ -81,7 +81,7 @@ class Car:
 
 
     def distanceNextCheckpoint(self, racetrack):
-        check = racetrack.checkpoints[self.checkpoint_passed % 13]
+        check = racetrack.checkpoints[self.checkpoint_passed]
         line = LineString(check)
 
         x = self.position.x
@@ -106,3 +106,18 @@ class Car:
         self.radar.updateRadar(self.position.x, self.position.y, self.angle)
 
         self.time_alive -= 1
+
+    def update2(self, dt):
+        self.velocity += (self.acceleration * dt, 0)
+        self.velocity.x = max(-self.max_velocity, min(self.velocity.x, self.max_velocity))
+
+        if self.steering:
+            turning_radius = self.length / sin(radians(self.steering))
+            angular_velocity = self.velocity.x / turning_radius
+        else:
+            angular_velocity = 0
+
+        self.position += self.velocity.rotate(-self.angle) * dt
+        self.angle += degrees(angular_velocity) * dt
+
+        self.radar.updateRadar(self.position.x, self.position.y, self.angle)

@@ -9,6 +9,25 @@ import time
 import math
 import visualize
 import os
+def get_coords(x,y,rand, r):
+    #BOTTOM
+    if(rand == 0):
+        return x, y + r * math.sqrt(3)
+    #TOP
+    if(rand == 1):
+        return x, y - r * math.sqrt(3)
+    #TOP RIGHT
+    if(rand == 2):
+        return x + r * 2 * 3/4, y - r * math.sqrt(3) / 2,
+    #TOP LEFTR
+    if(rand == 3):
+        return x - r * 2 * 3/4, y - r * math.sqrt(3) / 2
+    #BOTTEM LEFT
+    if(rand == 4):
+        return x - r * 2 * 3/4, y + r * math.sqrt(3) / 2
+    #BOTTOM RIGHT
+    if(rand == 5):
+        return x + r * 2 * 3/4, y + r * math.sqrt(3) / 2
 
 def draw_regular_polygon(surface, color, vertex_count, radius, position):
     n, r = vertex_count, radius
@@ -25,7 +44,6 @@ def draw_regular_polygon(surface, color, vertex_count, radius, position):
 
     return bla
 
-racetrack_file = 'pieces/11/'
 #Pygame init
 background_colour = (0,0,0)
 (width, height) = (800, 800)
@@ -46,7 +64,81 @@ inner_line = []
 outer_line = []
 
 corners = (draw_regular_polygon(screen, (50,50,50), 6, big, (400,400)))
+x,y = get_coords(400,400,0, big)
+corners0 = (draw_regular_polygon(screen, (50,50,50), 6, big, (x,y)))
+
 pygame.display.flip()
+line = []
+
+def save(line1, line2, file, name):
+    for line in line1:
+        line[0] = int((line[0] - 400)/multi)
+        line[1] = int((line[1] - 400)/multi)
+    for line in line2:
+        line[0] = int((line[0] - 400)/multi)
+        line[1] = int((line[1] - 400)/multi)
+    racetrack = []
+
+    racetrack.append(line1)
+    racetrack.append(line2)
+
+    racetrack_file = 'pieces\\'+str(file)+'\\racketrack' + str(name)+'.pkl'
+
+    with open(racetrack_file, "wb") as f:
+        pickle.dump(racetrack, f)
+        f.close()
+'''
+line1 = []
+line2 = []
+
+file = 14
+line1.append([corners[4][0], corners[4][1]])
+line2.append([corners[5][0], corners[5][1]])
+
+
+for i in range(len(line1)-1):
+    pygame.draw.line(screen, (255,0,0), line1[i],line1[i+1], 1)
+
+for i in range(len(line2)-1):
+    pygame.draw.line(screen, (255,0,0), line2[i],line2[i+1], 1)   
+pygame.display.flip()
+time.sleep(2)
+save(line2, line1, file,1)
+
+corner = 3
+file = 20
+#smooth circle
+#+210
+for a in range(525,420, -1):
+    width = big
+    r = big*2
+    x1 = r * math.cos(a/100)
+    y1 = r * math.sin(a/100)
+    line1.append([x1 + x , y1 + y])
+
+for i in range(len(line1)-1):
+    pygame.draw.line(screen, (255,0,0), line1[i],line1[i+1], 1)
+
+for a in range(525, 420, -1):
+    width = big
+    r = big
+    x1 = r * math.cos(a/100)
+    y1 = r * math.sin(a/100)
+    line2.append([x1 + x , y1 + y])
+
+for i in range(len(line2)-1):
+    pygame.draw.line(screen, (255,0,0), line2[i],line2[i+1], 1)   
+
+#line2.append([corners[corner][0], corners[corner][1]])
+pygame.display.flip()
+time.sleep(2)
+
+save(line2, line1, file,1)
+line1 = []
+line2 = []
+'''
+
+
 
 drawRacetrack = True
 while(drawRacetrack):
@@ -55,6 +147,9 @@ while(drawRacetrack):
             sys.exit(0)
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = list(pygame.mouse.get_pos())
+            print(type(pos))
+
+            print(pos)
             inner_line.append(pos)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
@@ -68,7 +163,6 @@ while(drawRacetrack):
         corners = (draw_regular_polygon(screen, (50,50,50), 6, big, (400,400)))
 
         pygame.display.flip()
-
 drawRacetrack =  True
 while(drawRacetrack):
     for event in pygame.event.get():
@@ -90,18 +184,6 @@ while(drawRacetrack):
 
         pygame.display.flip()
 
-for line in inner_line:
-    line[0] = int((line[0] - 400)/multi)
-    line[1] = int((line[1] - 400)/multi)
-for line in outer_line:
-    line[0] = int((line[0] - 400)/multi)
-    line[1] = int((line[1] - 400)/multi)
-racetrack = []
-racetrack.append(inner_line)
-racetrack.append(outer_line)
 
-racetrack_file = 'pieces\\14\\racketrack3.pkl'
 
-with open(racetrack_file, "wb") as f:
-    pickle.dump(racetrack, f)
-    f.close()
+save(inner_line, outer_line, 25,2)

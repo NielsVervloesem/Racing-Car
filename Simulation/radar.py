@@ -25,8 +25,17 @@ class Radar:
     def calculate_distance(self, racetrack):
         distances = []
 
-        inner_line = LinearRing(racetrack.inner_line)
-        outer_line = LinearRing(racetrack.outer_line)
+        aaa = []
+        bbb = []
+        for line in racetrack.innerHitLine:
+            for c in line:
+                aaa.append(c)
+
+        for line in racetrack.outerHitLine:
+            for c in line:
+                bbb.append(c)
+        inner_line = LineString(aaa)
+        outer_line = LineString(bbb)
         
         for line in self.radar_lines:
             line = LineString(line)

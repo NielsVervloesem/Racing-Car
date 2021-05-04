@@ -119,7 +119,6 @@ class RandomRacetrack:
                 infinity = infinity + 1
                 xCenter, yCenter, gridX, gridY, inp = get_coords(self.x_offset, self.y_offset, r,x,y)
                 if(infinity > 20):
-                    print("omg")
                     loop = 0
                     grid = []
                     racetrack = []

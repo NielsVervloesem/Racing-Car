@@ -2,6 +2,8 @@ import pickle
 import neat
 import pygame
 from racetrack import Racetrack
+from randomtrack import RandomRacetrack
+
 from car import Car
 import random
 import sys
@@ -25,10 +27,9 @@ screen.fill(background_colour)
 pygame.display.flip()
 clock = pygame.time.Clock()
 
-random.seed(17)
-racetrack = Racetrack(width, height, random.randint(100,120))
-car_x = racetrack.checkpoints[0][0]
-car_y = racetrack.checkpoints[0][1]
+racetrack = RandomRacetrack(width, height, 15)
+car_x = int(racetrack.start[0])
+car_y = int(racetrack.start[1])
 
 #red, green, blue, yellow, cyan, pink
 colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255),(255,0,255), (255,0,255),(255,0,255),(255,0,255),(255,0,255),(255,0,255),(255,0,255)]
@@ -37,11 +38,11 @@ modelName = []
 networks = []
 cars = []
 
-for filename in os.listdir("race"):
+for filename in os.listdir("Models"):
     if(filename.endswith("pkl")):
         filename = filename[:-4]
-        model_path = "ModelsV2/" + filename + ".pkl"
-        config_file = "ModelsV2/" + filename + ".txt"
+        model_path = "Models/" + filename + ".pkl"
+        config_file = "Models/" + filename + ".txt"
 
         with open(model_path, "rb") as f:
             winner = pickle.load(f)
@@ -53,10 +54,10 @@ for filename in os.listdir("race"):
         winner_model = neat.nn.FeedForwardNetwork.create(winner, config)
 
         networks.append(winner_model)
-        cars.append(Car(filename, car_x, car_y))
+        cars.append(Car(filename, car_x, car_y, 80))
         modelName.append(filename)
         nodes = {0:'Speed',1:'Angle'}
-        visualize.draw_net(config, winner, True,node_names=nodes, filename="test")
+        #visualize.draw_net(config, winner, True,node_names=nodes, filename=filename)
 
 dt = 0.17
 run = True
@@ -69,32 +70,25 @@ for i in range(100):
                 sys.exit(0)
 
         #Draw racetrack
-        pygame.draw.lines(screen, (255,255,255), True, racetrack.outer_line)
-        pygame.draw.lines(screen, (255,255,255), True, racetrack.inner_line)
+        for line in racetrack.innerHitLine:
+            pygame.draw.lines(screen, (255,0,0), False, line,2)
 
-        for checkpoint in racetrack.checkpoints:
-            pygame.draw.circle(screen, (0,255,0), checkpoint, 3)
+        for line in racetrack.outerHitLine:
+            pygame.draw.lines(screen, (255,0,0), False, line,2)
+
+        colorOffset = 0
+        for i in range(0,len(racetrack.checkpoints),2):
+            p1 = (int(racetrack.checkpoints[i][0]),int(racetrack.checkpoints[i][1]))
+            p2 = (int(racetrack.checkpoints[i+1][0]),int(racetrack.checkpoints[i+1][1]))
+            pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 1)    
+            colorOffset = colorOffset + 5
 
         #Loop cars and make them drive
         for index, car in enumerate(cars):
             if(car.is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
                 sensors = car.radar.calculate_distance(racetrack)
-                inputdata = []
-
-                if(int(car.name[5]) > 7):
-                    inputdata.append(sensors[0])
-                if(int(car.name[5]) > 5):
-                    inputdata.append(sensors[1])
-                    inputdata.append(sensors[7])
-                if(int(car.name[5]) > 3):
-                    inputdata.append(sensors[2])
-                    inputdata.append(sensors[6])
-                inputdata.append(sensors[3])
-                inputdata.append(sensors[4]) #MID
-                inputdata.append(sensors[5])
-
-                output = networks[index].activate(inputdata)
+                output = networks[index].activate(sensors)
 
                 if(len(output) > 2):
                     softmax_result = softmax(output)
@@ -145,15 +139,15 @@ for i in range(100):
                     run = False
 
                 #car.check_passed(racetrack)
-                if(car.checkpoint_passed == 35):
+                if(car.checkpoint_passed == len(racetrack.checkpoints)):
                     car.is_alive = False
                     run = False
                 
                 #Draw each cars (no radar lines because of lag)
-                """
+                
                 for line in car.radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
-                """
+                
                 
                 pygame.draw.circle(screen, colors[index], (int(car.position.x), int(car.position.y)), car.length)
 
@@ -169,9 +163,9 @@ for i in range(100):
         screen.fill(background_colour)
         clock.tick(60)
 
-    racetrack = Racetrack(width, height, random.randint(150,180))
-    car_x = racetrack.checkpoints[0][0]
-    car_y = racetrack.checkpoints[0][1]
+    racetrack = RandomRacetrack(width, height, 15)
+    car_x = int(racetrack.start[0])
+    car_y = int(racetrack.start[1])
 
     #red, green, blue, yellow, cyan, pink
     colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255),(255,0,255)]

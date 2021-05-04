@@ -41,6 +41,8 @@ class Radar:
             line = LineString(line)
             intersection = (line.intersection(inner_line))
             
+            if(isinstance(intersection, shapely.geometry.multilinestring.MultiLineString)):
+                intersection = intersection[0]
             #CLEAN UP SOMEDAY
             if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
                 intersection = intersection[len(intersection)-1]
@@ -52,7 +54,9 @@ class Radar:
                 distances.append(self.radar_length)
 
             intersection = (line.intersection(outer_line))
-            
+            if(isinstance(intersection, shapely.geometry.multilinestring.MultiLineString)):
+                intersection = intersection[0]
+
             if(isinstance(intersection, shapely.geometry.multipoint.MultiPoint)):
                 intersection = intersection[len(intersection)-1]
 

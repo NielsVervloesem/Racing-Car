@@ -26,7 +26,7 @@ class Car:
         self.steering = 0.0
         self.name = name
         self.prevSteering = 0
-        self.time = 15
+        self.time = 60
 
         self.time_alive = self.time
         self.checkpoint_passed = 2
@@ -62,10 +62,9 @@ class Car:
                 intersection1 = intersection1[len(intersection1)-1]
 
         if(len(intersection1.coords) == 1):
-            print("PASSED")
             self.checkpoint_passed = self.checkpoint_passed + 2
             score = self.time_alive + 900
-            self.time_alive = 100
+            self.time_alive = 60
 
         return score
 

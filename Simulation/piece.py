@@ -53,10 +53,7 @@ class Piece:
             if(self.input == 5):
                 if(string < 55):
                     inverse = True
-
-        if(output == 5):
-            if(self.input == 2):
-                print("#@#@#@@##@@##@@#@##@@##@@#")       
+   
         if(inverse):
             path = r'pieces/' + str(output) + str(self.input)
         else:

@@ -186,4 +186,4 @@ while(drawRacetrack):
 
 
 
-save(inner_line, outer_line, 25,2)
+save(inner_line, outer_line, 34,2)

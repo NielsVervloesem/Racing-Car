@@ -15,7 +15,7 @@ from neat.math_util import softmax
 from random import randrange
 
 #MODEL PARAMS INIT
-name = "ModelV26"
+name = "ModelShortToLongV3"
 config_path = "./config-feedforward.txt"
 carMaxSpeed = 20 * 1
 carSensors = 8
@@ -27,10 +27,10 @@ def run(genomes, config):
     global radar_lenght
     radar_lenght = 60
     counter = 0
+    racetrack = RandomRacetrack(width, height, 15)
 
     networks = []
     cars = []
-    racetrack = RandomRacetrack(width, height, 30)
 
     car_x = int(racetrack.start[0])
     car_y = int(racetrack.start[1])
@@ -49,15 +49,14 @@ def run(genomes, config):
     dt = 0.17
     run = True
     while run:
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
         
         #Draw racetrack
-              
         for line in racetrack.innerHitLine:
             pygame.draw.lines(screen, (255,0,0), False, line,2)
-
 
         for line in racetrack.outerHitLine:
             pygame.draw.lines(screen, (255,0,0), False, line,2)
@@ -73,6 +72,8 @@ def run(genomes, config):
             if(car.is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
                 sensors = car.radar.calculate_distance(racetrack) 
+
+                '''
                 inputdata = []
 
                 #Collect the correct amount of sensors data
@@ -91,7 +92,8 @@ def run(genomes, config):
                     inputdata.append(sensors[7]) #40
                 if(int(car.name) > 5):
                     inputdata.append(sensors[7]) #90
-                output = networks[index].activate(inputdata)
+                '''
+                output = networks[index].activate(sensors)
 
                 #TRANSFORM OUTPUT TO MOVEMENT
                 if(len(output) > 2):
@@ -131,25 +133,32 @@ def run(genomes, config):
                             car.steering = car.steering - 45
                 else:
                     car.velocity[0] = output[0] * carMaxSpeed
-                    car.steering = output[1] * 90 - 45
+                    car.steering = output[1] * 30 - 15
+
+
 
                 car.update(dt)
-                
+         
                 #Kill off bad cars
+                
                 if (racetrack.hit(car)):
                     car.is_alive = False
 
                 if(car.time_alive == 0):
                     car.is_alive = False
 
-
                 if(car.checkpoint_passed == len(racetrack.checkpoints)):
-
+                    
                     screen.fill(background_colour)
                     pygame.display.update()
+                    
+                    racetrack = RandomRacetrack(width, height, 30)
 
-                    racetrack = RandomRacetrack(width, height, 4)
-            
+                    radar_lenght = radar_lenght + 60
+                    
+                    if(radar_lenght > 120):
+                        genomes[i][1].fitness = 999999999
+                    
                     for c in cars:
                         if(car.is_alive):
                             c.position[0] = int(racetrack.start[0])
@@ -162,19 +171,16 @@ def run(genomes, config):
                             c.angle = -90
                             c.radar.car_angle = -90
                             c.radar.radar_length = radar_lenght
-
                             c.radar.updateRadar(int(racetrack.start[0]), int(racetrack.start[1]), -90)
                             c.time = c.time
                             c.time_alive = c.time
-
-                    
-                '''           
+                
                 #Draw each cars (no radar lines because of lag)
                 for line in car.radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
                 
                 pygame.draw.circle(screen, (255,0,0), (int(car.position.x), int(car.position.y)), car.length)
-                '''
+                
         #Update car fitness
         remain_cars = 0
         for i, car in enumerate(cars):
@@ -184,7 +190,7 @@ def run(genomes, config):
                 genomes[i][1].fitness = genomes[i][1].fitness + score - car.update_score()
                 car.prevSteering = car.steering
 
-
+        ''''
         #update screen with best car information
         textsurface = myfont.render(("Generation: "+str(generation)), False, (255, 255, 255))
         screen.blit(textsurface,(0,0))
@@ -203,19 +209,21 @@ def run(genomes, config):
         screen.blit(textsurface,(0,40))
         textsurface = myfont.render(("fitt "+str(fitt)), False, (255, 255, 255))
         screen.blit(textsurface,(0,60))
-        
+        '''
         #if all cars are dead, break out loop and go to next generation
         if remain_cars == 0:
             break
         
         #update screen
+        
         pygame.display.update()
         screen.fill(background_colour)
-        clock.tick(60)
         
 #Pygame init
+
 (width, height) = (1000, 1000)
 background_colour = (0,0,0)
+
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Murphy simulation')
 pygame.font.init()
@@ -240,7 +248,7 @@ generation = 0
 
 #Run NEAT
 global racetrack
-racetrack = RandomRacetrack(width, height, 2)
+racetrack = RandomRacetrack(width, height, 30)
 global radar_lenght
 model = population.run(run, 200)
 

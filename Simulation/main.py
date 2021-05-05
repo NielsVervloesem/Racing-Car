@@ -15,7 +15,7 @@ from neat.math_util import softmax
 from random import randrange
 
 #MODEL PARAMS INIT
-name = "ModelShortToLongV3"
+name = "speed"
 config_path = "./config-feedforward.txt"
 carMaxSpeed = 20 * 1
 carSensors = 8
@@ -25,7 +25,7 @@ racetrack_file = 'modelsV3\\racketrackV1.pkl'
 def run(genomes, config):
     global racetrack
     global radar_lenght
-    radar_lenght = 60
+    radar_lenght = 50
     counter = 0
     racetrack = RandomRacetrack(width, height, 15)
 
@@ -153,8 +153,6 @@ def run(genomes, config):
                     pygame.display.update()
                     
                     racetrack = RandomRacetrack(width, height, 30)
-
-                    radar_lenght = radar_lenght + 60
                     
                     if(radar_lenght > 120):
                         genomes[i][1].fitness = 999999999

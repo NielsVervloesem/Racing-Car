@@ -94,6 +94,7 @@ def run(genomes, config):
                     inputdata.append(sensors[7]) #90
                 '''
                 output = networks[index].activate(sensors)
+                print(output)
 
                 #TRANSFORM OUTPUT TO MOVEMENT
                 if(len(output) > 2):

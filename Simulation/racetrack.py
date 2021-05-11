@@ -70,8 +70,10 @@ class Racetrack:
         self.checkpoints = self.checkpoints[::-1]
         
     def hit(self, car):
-        x = car.position.x
-        y = car.position.y
+        print('??')
+        x = car.position.x *32
+        y = car.position.y *32
+        print(x,y)
         lenght = car.length
 
         line1 = LineString([(x-lenght, y-lenght),(x+lenght, y-lenght),(x-lenght, y+lenght),(x+lenght, y+lenght)])

@@ -1,7 +1,6 @@
 import pickle
 import neat
 import pygame
-from racetrack import Racetrack
 from car import Car
 import random
 import sys
@@ -42,7 +41,7 @@ def get_coords(x,y,r,xc,yc):
         return x + r * 2 * 3/4, y + r * math.sqrt(3) / 2,xc+1,yc,3
 
 class RandomRacetrack:
-    def __init__(self, width, height, amount, racewidth):
+    def __init__(self, width, height, amount):
         self.x_offset = width / 2
         self.y_offset = height / 2
 
@@ -53,7 +52,6 @@ class RandomRacetrack:
         self.outerHitLine = []
         self.start = 0
         self.startAngle = -90
-        self.racewidth = racewidth
 
         self.generateRacetrack(amount)
 
@@ -63,24 +61,7 @@ class RandomRacetrack:
         y = car.y
         lenght = car.car_length
 
-        p1 = [car.x-car.car_length/4,car.y-car.car_width/2]
-        p2 = [car.x+(0.75*car.car_length),car.y-car.car_width/2]
-        p3 = [car.x+(0.75*car.car_length),car.y+car.car_width/2]
-        p4 = [car.x-car.car_length/4,car.y+car.car_width/2]
-
-        corners = (p1,p2,p3,p4)
-        rotated_corners = []
-
-        for p in corners:
-            temp = []
-            length = math.sqrt((p[0] - car.x)**2 + (car.y - p[1])**2)
-            angle = math.atan2(car.y - p[1], p[0] - car.x)
-            angle += car.orientation
-            temp.append(car.x + length*math.cos(angle))
-            temp.append(car.y - length*math.sin(angle))
-            rotated_corners.append(temp)
-
-        line1 = LineString((rotated_corners[0],rotated_corners[1],rotated_corners[2],rotated_corners[3]))
+        line1 = LineString([(x-lenght, y-lenght),(x+lenght, y-lenght),(x-lenght, y+lenght),(x+lenght, y+lenght)])
 
         aaa = []
         bbb = []
@@ -119,7 +100,7 @@ class RandomRacetrack:
         loop = 0
         x = 0
         y = 0
-        r = self.racewidth
+        r = 100
         racetrack = []
         grid = []
         for i in range(2):
@@ -177,11 +158,11 @@ class RandomRacetrack:
 
         self.start = racetrack[0].center
         for i in range(len(racetrack)-1):
-                innerline, outerline, inhitline, outhitline = racetrack[i].generateCellTrack(racetrack[i+1].inputcorners, racetrack[i+1].input, self.racewidth)
-                self.innerlines.append(innerline)
-                self.outerlines.append(outerline)
-                self.innerHitLine.append(inhitline)
-                self.outerHitLine.append(outhitline)
+                innerline, outerline, inhitline, outhitline = racetrack[i].generateCellTrack(racetrack[i+1].inputcorners, racetrack[i+1].input)
+                self.innerlines.append(list(innerline))
+                self.outerlines.append(list(outerline))
+                self.innerHitLine.append(list(inhitline))
+                self.outerHitLine.append(list(outhitline))
 
 
 def get_corners_of_hex(vertex_count, radius, position):

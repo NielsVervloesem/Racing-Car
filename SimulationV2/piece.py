@@ -2,6 +2,8 @@ import pickle
 from random import randrange
 import os
 import time
+from shapely.geometry import LineString, LinearRing
+
 class Piece:
     def __init__(self, center, input):
         self.center = center
@@ -14,14 +16,13 @@ class Piece:
     def updateinput(self,inp):
         self.inputcorners = inp
 
-    def generateCellTrack(self,outputcorners, output, width):
+    def generateCellTrack(self,outputcorners, output):
         inverse = False
         centerx = self.center[0]
         centery = self.center[1]
         innerline = []
         outerline = []
         output = (output + 3) % 6
-        width = width / 50
 
 
         if(self.input == output):
@@ -65,40 +66,64 @@ class Piece:
         with open(racetrack_file, "rb") as f:
             racetrack = pickle.load(f)   
 
-
-
         if(inverse):
             outerline.append(self.inputcorners[0])
             for line in racetrack[1]:
-                outerline.append((centerx + line[0]*width, centery + line[1]*width))
+                outerline.append((centerx + line[0]*2, centery + line[1]*2))
             outerline.append(outputcorners[0])
 
             innerline.append(self.inputcorners[1])
             for line in racetrack[0]:
-                innerline.append((centerx+line[0]*width, centery + line[1]*width))
+                innerline.append((centerx+line[0]*2, centery + line[1]*2))
             innerline.append(outputcorners[1])
 
-            return innerline, outerline, innerline, outerline
+            aaa = []
+            bbb = []
+            for line in innerline:
+                for c in line:
+                    aaa.append(c)
+
+            for line in outerline:
+                for c in line:
+                    bbb.append(c)
+            inner_line = LineString(aaa)
+            outer_line = LineString(bbb)
+
+            return aaa, bbb, innerline, outerline
         else:
             innerline.append(self.inputcorners[1])
             for line in racetrack[1]:
-                innerline.append((centerx + line[0]*width, centery + line[1]*width))
+                innerline.append((centerx + line[0]*2, centery + line[1]*2))
             innerline.append(outputcorners[1])
 
             self.innerHitLine.append(self.inputcorners[1])
             racetrack[1].reverse()
             for line in racetrack[1]:
-                self.innerHitLine.append((centerx + line[0]*width, centery + line[1]*width))
+                self.innerHitLine.append((centerx + line[0]*2, centery + line[1]*2))
             self.innerHitLine.append(outputcorners[1])
             
-            outerline.append(outputcorners[0])
+            outerline.append((outputcorners[0]))
             for line in racetrack[0]:
-                outerline.append((centerx+line[0]*width, centery + line[1]*width))
-            outerline.append(self.inputcorners[0])
+                outerline.append((centerx+line[0]*2, centery + line[1]*2))
+            outerline.append((self.inputcorners[0]))
 
             self.outerHitLine.append(self.inputcorners[0])
             racetrack[0].reverse()
             for line in racetrack[0]:
-                self.outerHitLine.append((centerx + line[0]*width, centery + line[1]*width))
+                self.outerHitLine.append((centerx + line[0]*2, centery + line[1]*2))
             self.outerHitLine.append(outputcorners[0])
-            return innerline, outerline, self.innerHitLine, self.outerHitLine
+
+            aaa = []
+            bbb = []
+            for line in innerline:
+                for c in line:
+                    aaa.append(c)
+
+            for line in outerline:
+                for c in line:
+                    bbb.append(c)
+            inner_line = LineString(aaa)
+            outer_line = LineString(bbb)
+
+            return aaa, bbb, innerline, outerline
+            

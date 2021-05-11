@@ -13,7 +13,7 @@ def calculate_distance(x1,y1,x2,y2):
     return distance
 
 class Car:
-    def __init__(self, name, x, y, radar_length, angle=-90, length=16):
+    def __init__(self, x, y):
         #set x,y and orientation posistion
         self.x = x
         self.y = y
@@ -22,25 +22,25 @@ class Car:
         #set steering and acceleration/speed values
         self.steering_angle = 0.0
         self.previous_steering_angle = 0.0
-        self.max_steering_angle = math.radians(40)
+        self.max_steering_angle = math.radians(30)
         self.acceleration = 0.0
         self.max_acceleration = 5.0
         self.speed = 0.0
-        self.max_speed = 10
+        self.max_speed = 5
 
         #build car body based on the lenght
-        self.car_length = 50
-        self.car_width = 30 
-        self.wheel_length = 10 
-        self.wheel_width = 5
+        self.car_length = 32
+        self.car_width = 32 / 4 * 3
+        self.wheel_length = 32 / 4
+        self.wheel_width = 32 / 16
 
         #set params used for score calculation
-        self.time = 200
+        self.time = 150
         self.time_alive = 200
         self.checkpoint_passed = 2
         self.is_alive = True
 
-        self.radar = Radar(self.x, self.y, radar_length, (180, -90, -40, -15, 0, 15, 40, 90), math.degrees(self.steering_angle))
+        self.radar = Radar(self.x, self.y, 130, (180, -90, -40, -15, 0, 15, 40, 90), math.degrees(self.steering_angle))
 
     #When passing a checkpoint of the racetrack, reward the car with a bonus
     #First one to pass will get the max bonus, second one will recieve 500 points less
@@ -53,23 +53,7 @@ class Car:
         p3 = [self.x+(0.75*self.car_length),self.y+self.car_width/2]
         p4 = [self.x-self.car_length/4,self.y+self.car_width/2]
 
-        corners = (p1,p2,p3,p4)
-
-        c_x = self.x
-        c_y = self.y
-        delta_angle = self.orientation
-        rotated_corners = []
-
-        for p in corners:
-            temp = []
-            length = math.sqrt((p[0] - c_x)**2 + (c_y - p[1])**2)
-            angle = math.atan2(c_y - p[1], p[0] - c_x)
-            angle += delta_angle
-            temp.append(c_x + length*math.cos(angle))
-            temp.append(c_y - length*math.sin(angle))
-            rotated_corners.append(temp)
-
-        line1 = LineString((rotated_corners[0],rotated_corners[1],rotated_corners[2],rotated_corners[3]))
+        line1 = LineString([(p1),(p2),(p3),(p4)])
         line2 = LineString([check1, check2])
         intersection1 = (line1.intersection(line2))
 
@@ -88,7 +72,7 @@ class Car:
         b = self.previous_steering_angle + 45
 
         if(a > b):
-            return (a - b)
+            return (a - b) 
         else:
             return (b - a)
 
@@ -141,21 +125,3 @@ class Car:
 
         self.radar.updateRadar(self.x, self.y, math.degrees(self.orientation))
         self.time_alive -= 1
-
-        '''
-        if self.steering:
-            turning_radius = self.length / sin(radians(self.steering))
-            angular_velocity = self.velocity.x / turning_radius
-        else:
-            angular_velocity = 0
-
-        self.position += self.velocity.rotate(-self.angle) * dt
-        self.angle += degrees(angular_velocity) * dt
-
-
-    
-        self.radar.updateRadar(self.position.x, self.position.y, self.angle)
-        self.time_alive -= 1
-        
-        '''
-

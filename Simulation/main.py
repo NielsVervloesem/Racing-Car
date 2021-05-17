@@ -196,7 +196,7 @@ def run(genomes, config):
                 if(car.speed > 6 and abs(math.degrees(car.steering_angle)) > 35):
                     car.is_alive = False
                 
-                if(car.checkpoint_passed == len(racetrack.checkpoints)):
+                if(car.checkpoint_passed == len(racetrack.checkpoints)-2):
                     trackLenght = trackLenght + 1
                     screen.fill(background_colour)
                     pygame.display.update()

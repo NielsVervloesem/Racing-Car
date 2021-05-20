@@ -54,7 +54,7 @@ class RandomRacetrack:
         self.start = 0
         self.startAngle = -90
         self.racewidth = racewidth
-
+        self.hex = []
         self.generateRacetrack(amount)
 
 
@@ -174,6 +174,9 @@ class RandomRacetrack:
             self.checkpoints.append(corners[inCorner2])
 
             piece.updateinput((corners[inCorner1], corners[inCorner2]))
+
+            self.hex.append((get_corners_of_hex(6, r, piece.center)))
+
 
         self.start = racetrack[0].center
         for i in range(len(racetrack)-1):

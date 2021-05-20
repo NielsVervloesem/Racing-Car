@@ -28,9 +28,8 @@ pygame.display.flip()
 clock = pygame.time.Clock()
 
 
-model_path = "ackermanV1.pkl"
+model_path = "laggyModel2.pkl"
 config_file = "config-feedforward.txt"
-
 
 with open(model_path, "rb") as f:
     winner = pickle.load(f)

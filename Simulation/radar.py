@@ -1,6 +1,7 @@
 from shapely.geometry import LineString, LinearRing
 import shapely
 import math
+import time
 
 class Radar:
     def __init__(self, x, y, radar_length, radar_angles, car_angle):
@@ -11,6 +12,9 @@ class Radar:
         self.radar_lines = []
         self.car_angle = car_angle
         self.updateRadar(self.x, self.y, self.car_angle)
+        self.prevReading = []
+        self.lag = 4
+        self.now = time.time()
 
     def updateRadar(self, x, y, car_angle):
         self.car_angle = car_angle
@@ -112,5 +116,9 @@ class Radar:
         rds = []
         for rd in realDistances:
             rds.append(rd / self.radar_length)
-            
-        return rds
+        
+        self.lag = self.lag + 1
+        if(self.lag == 5):
+            self.prevReading = rds
+            self.lag = 0
+        return self.prevReading

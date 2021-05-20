@@ -14,9 +14,10 @@ import random
 import numpy as np
 from neat.math_util import softmax
 from random import randrange
+import visualize
 
 #MODEL PARAMS INIT
-name = "speed"
+name = "laggyModel2"
 config_path = "./config-feedforward.txt"
 carMaxSpeed = 20 * 1
 carSensors = 8
@@ -51,12 +52,22 @@ def draw_rect(center, corners, rotation_angle, color):
 def run(genomes, config):
     radar_lenght = 130
     counter = 0
-    random.seed(10)
     global generation
     generation = generation + 1
     global trackLenght 
+    global racetrack
 
-    racetrack = RandomRacetrack(width, height, trackLenght ,randrange(90,110))
+    '''
+    if(generation > 40):
+        random.seed(124)
+    if(generation > 45):
+        random.seed(21)
+    '''
+    random.seed(20)
+
+    racetrack = RandomRacetrack(800, 400, 15, 130)
+    racetrack = RandomRacetrack(500, 200, 3 ,120)
+
 
     networks = []
     cars = []
@@ -83,7 +94,7 @@ def run(genomes, config):
     fitt = -99999
     t = 9999
     bestcarindex = 0
-                
+    global j
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -95,7 +106,7 @@ def run(genomes, config):
 
         if pressed[pygame.K_LEFT]:
                 ticks = ticks -1
-
+    
         #Draw racetrack
         for line in racetrack.innerHitLine:
             pygame.draw.lines(screen, (255,0,0), False, line,2)
@@ -110,10 +121,11 @@ def run(genomes, config):
             pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 1)    
             colorOffset = colorOffset + 5
         
-        for index, car in enumerate(cars):
-            if(car.is_alive):
+        for i in range(j*10,j*10+10):
+        #for index, car in enumerate(cars):
+            if(cars[i].is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
-                sensors = car.radar.calculate_distance(racetrack) 
+                sensors = cars[i].radar.calculate_distance(racetrack) 
                 '''
                 inputdata = []
 
@@ -134,8 +146,7 @@ def run(genomes, config):
                 if(int(car.name) > 5):
                     inputdata.append(sensors[7]) #90
                 '''
-                output = networks[index].activate(sensors)
-
+                output = networks[i].activate(sensors)
                 #TRANSFORM OUTPUT TO MOVEMENT
                 if(len(output) > 2):
                     softmax_result = softmax(output)
@@ -173,38 +184,39 @@ def run(genomes, config):
                         if(car.steering > -45):
                             car.steering = car.steering - 45
                 else:
-                    car.speed = output[0] * car.max_speed
-                    car.steering_angle = output[1] * car.max_steering_angle * 2 - car.max_steering_angle
- 
-                car.update(dt)
+                    cars[i].speed = 3# output[0] * 10
+                    cars[i].steering_angle = output[1] * car.max_steering_angle * 2 - car.max_steering_angle
+
+                cars[i].update(dt)
                 #Kill off bad cars
                 
-                if (racetrack.hit(car)):
-                    car.is_alive = False
+                if (racetrack.hit(cars[i])):
+                    cars[i].is_alive = False
+                
+                if(cars[i].time_alive == 0):
+                    cars[i].is_alive = False
+
+                '''
+                if(cars[i].speed > 9 and abs(math.degrees(cars[i].steering_angle)) > 20):
+                    cars[i].is_alive = False
 
                 
-                if(car.time_alive == 0):
-                    car.is_alive = False
-
-                
-                if(car.speed > 9 and abs(math.degrees(car.steering_angle)) > 20):
-                    car.is_alive = False
-                if(car.speed > 8 and abs(math.degrees(car.steering_angle)) > 25):
-                    car.is_alive = False
-                if(car.speed > 7 and abs(math.degrees(car.steering_angle)) > 30):
-                    car.is_alive = False
-                if(car.speed > 6 and abs(math.degrees(car.steering_angle)) > 35):
-                    car.is_alive = False
-                
-                if(car.checkpoint_passed == len(racetrack.checkpoints)-2):
-                    trackLenght = trackLenght + 1
+                if(cars[i].speed > 8 and abs(math.degrees(cars[i].steering_angle)) > 25):
+                    cars[i].is_alive = False
+                if(cars[i].speed > 7 and abs(math.degrees(cars[i].steering_angle)) > 30):
+                    cars[i].is_alive = False
+                if(cars[i].speed > 6 and abs(math.degrees(cars[i].steering_angle)) > 35):
+                    cars[i].is_alive = False
+                '''
+                if(cars[i].checkpoint_passed == len(racetrack.checkpoints)-2):
+                    
                     screen.fill(background_colour)
                     pygame.display.update()
-                    random.seed(10)
-                    racetrack = RandomRacetrack(width, height, trackLenght, randrange(90,110))
+                    racetrack = RandomRacetrack(500, 200, 3 ,random.randrange(120,150))
                     
                     for c in cars:
-                        if(car.is_alive):
+
+                        if(cars[i].is_alive):
                             c.x = int(racetrack.start[0])
                             c.y = int(racetrack.start[1])
                             c.checkpoint_passed = 2
@@ -223,25 +235,25 @@ def run(genomes, config):
                 
                 #Draw each cars
                 
-                for line in car.radar.radar_lines:
+                for line in cars[i].radar.radar_lines:
                     pygame.draw.line(screen, (0,0,255), line[0], line[1], 1)
                 
                 #pygame.draw.circle(screen, (255,0,0), (int(car.x), int(car.y)), car.car_length)
                             
-                car_x = car.x 
-                car_y = car.y 
-                orientation = car.orientation
-                steering_angle = car.steering_angle
-                car_length = car.car_length
-                car_width = car.car_width
-                wheel_length = car.wheel_length
-                wheel_width = car.wheel_width
+                car_x = cars[i].x 
+                car_y = cars[i].y 
+                orientation = cars[i].orientation
+                steering_angle = cars[i].steering_angle
+                car_length = cars[i].car_length
+                car_width = cars[i].car_width
+                wheel_length = cars[i].wheel_length
+                wheel_width = cars[i].wheel_width
 
                 p1 = [car_x-car_length/4,car_y-car_width/2]
                 p2 = [car_x+(0.75*car_length),car_y-car_width/2]
                 p3 = [car_x+(0.75*car_length),car_y+car_width/2]
                 p4 = [car_x-car_length/4,car_y+car_width/2]
-                if(index == bestcarindex):
+                if(i == bestcarindex):
                     draw_rect([car_x, car_y], [p1, p2, p3, p4], orientation, (255,0,0))
                 else:
                     draw_rect([car_x, car_y], [p1, p2, p3, p4], orientation, (0,0,255))
@@ -325,13 +337,13 @@ def run(genomes, config):
 
                 # draw mid of axle
                 pygame.draw.circle(screen, (255,255,0), (int(car_x), int(car_y)), 3)
-
+                
                 if(not cars[bestcarindex].is_alive):
                     fitt = -9999
 
-                if(fitt < genomes[index][1].fitness):
-                    fitt = genomes[index][1].fitness
-                    bestcarindex = index
+                if(fitt < genomes[i][1].fitness):
+                    fitt = genomes[i][1].fitness
+                    bestcarindex = i
                 bla = cars[bestcarindex].time_alive
                 blav = cars[bestcarindex].speed
                 blas = cars[bestcarindex].steering_angle
@@ -339,11 +351,11 @@ def run(genomes, config):
 
         #Update car fitness
         remain_cars = 0
-        for i, car in enumerate(cars):
-            if(car.is_alive):
+        for i in range(j*10,j*10+10):
+            if(cars[i].is_alive):
                 remain_cars += 1
-                score = car.check_passed(racetrack)
-                genomes[i][1].fitness = genomes[i][1].fitness + score - car.update_score()
+                score = cars[i].check_passed(racetrack)
+                genomes[i][1].fitness = genomes[i][1].fitness + score - cars[i].update_score()
                 car.previous_steering_angle = car.steering_angle
 
        
@@ -368,6 +380,15 @@ def run(genomes, config):
         #if all cars are dead, break out loop and go to next generation
         if remain_cars == 0:
             break
+            '''
+            j = j +1
+            random.seed(20)
+            racetrack = RandomRacetrack(width, height, 10 ,random.randrange(120,150))
+
+            if(j == 30):
+                j = 1
+                break
+            '''
         
         #update screen
         pygame.display.set_caption('(%d FPS)' % (clock.get_fps()))
@@ -378,7 +399,6 @@ def run(genomes, config):
 
         
 #Pygame init
-
 (width, height) = (1000, 1000)
 background_colour = (0,0,0)
 
@@ -406,11 +426,16 @@ generation = 0
 
 #Run NEAT
 global racetrack
-racetrack = RandomRacetrack(800, 400, 5, 110)
+
 global radar_lenght
 global trackLenght 
 trackLenght = 1
-model = population.run(run, 200)
+global j 
+j = 0
+model = population.run(run, 50)
+
+visualize.draw_net(config, model, True, 'bla')
+
 
 with open(name + ".pkl", "wb") as f:
     pickle.dump(model, f)

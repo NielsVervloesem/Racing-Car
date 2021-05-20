@@ -22,7 +22,7 @@ class Car:
         #set steering and acceleration/speed values
         self.steering_angle = 0.0
         self.previous_steering_angle = 0.0
-        self.max_steering_angle = math.radians(40)
+        self.max_steering_angle = math.radians(30)
         self.acceleration = 0.0
         self.max_acceleration = 5.0
         self.speed = 0.0
@@ -138,7 +138,6 @@ class Car:
         self.y = _y
         self.orientation = _theta
         self.steering_angle = alpha
-
         self.radar.updateRadar(self.x, self.y, math.degrees(self.orientation))
         self.time_alive -= 1
 

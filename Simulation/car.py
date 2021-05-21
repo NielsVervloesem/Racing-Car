@@ -88,9 +88,9 @@ class Car:
         b = self.previous_steering_angle + 45
 
         if(a > b):
-            return (a - b)
+            return 1-(a - b)
         else:
-            return (b - a)
+            return 1-(b - a)
 
 
     def distanceNextCheckpoint(self, racetrack):

@@ -17,7 +17,7 @@ from random import randrange
 import visualize
 
 #MODEL PARAMS INIT
-name = "laggyModel2"
+name = "norandomnospeed120150"
 config_path = "./config-feedforward.txt"
 carMaxSpeed = 20 * 1
 carSensors = 8
@@ -63,10 +63,8 @@ def run(genomes, config):
     if(generation > 45):
         random.seed(21)
     '''
-    random.seed(20)
-
-    racetrack = RandomRacetrack(800, 400, 15, 130)
-    racetrack = RandomRacetrack(500, 200, 3 ,120)
+    random.seed(7)
+    racetrack = RandomRacetrack(400, 400, 15, 130)
 
 
     networks = []
@@ -121,7 +119,7 @@ def run(genomes, config):
             pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 1)    
             colorOffset = colorOffset + 5
         
-        for i in range(j*10,j*10+10):
+        for i in range(20):
         #for index, car in enumerate(cars):
             if(cars[i].is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
@@ -212,10 +210,9 @@ def run(genomes, config):
                     
                     screen.fill(background_colour)
                     pygame.display.update()
-                    racetrack = RandomRacetrack(500, 200, 3 ,random.randrange(120,150))
+                    racetrack = RandomRacetrack(400, 400, 15, random.randrange(120,150))
                     
                     for c in cars:
-
                         if(cars[i].is_alive):
                             c.x = int(racetrack.start[0])
                             c.y = int(racetrack.start[1])
@@ -242,6 +239,8 @@ def run(genomes, config):
                             
                 car_x = cars[i].x 
                 car_y = cars[i].y 
+
+ 
                 orientation = cars[i].orientation
                 steering_angle = cars[i].steering_angle
                 car_length = cars[i].car_length
@@ -338,6 +337,10 @@ def run(genomes, config):
                 # draw mid of axle
                 pygame.draw.circle(screen, (255,255,0), (int(car_x), int(car_y)), 3)
                 
+
+                textsurface = myfont.render(str(genomes[i][1].key), False, (255, 255, 255))
+                screen.blit(textsurface,(car_x,car_y))
+
                 if(not cars[bestcarindex].is_alive):
                     fitt = -9999
 
@@ -351,11 +354,11 @@ def run(genomes, config):
 
         #Update car fitness
         remain_cars = 0
-        for i in range(j*10,j*10+10):
+        for i in range(20):
             if(cars[i].is_alive):
                 remain_cars += 1
                 score = cars[i].check_passed(racetrack)
-                genomes[i][1].fitness = genomes[i][1].fitness + score - cars[i].update_score()
+                genomes[i][1].fitness = genomes[i][1].fitness + score + cars[i].update_score()
                 car.previous_steering_angle = car.steering_angle
 
        
@@ -379,7 +382,19 @@ def run(genomes, config):
         screen.blit(textsurface,(0,140))
         #if all cars are dead, break out loop and go to next generation
         if remain_cars == 0:
-            break
+            best = -999
+            key = 0
+            best_g = None
+            for g in genomes:
+                print(g[1].fitness, g[1].key)
+                if(g[1].fitness > best):
+                    best = g[1].fitness
+                    best_g = g[1]
+                    key = g[1].key
+
+            visualize.draw_net(config, best_g, True, str(key))
+
+            run = False
             '''
             j = j +1
             random.seed(20)
@@ -432,7 +447,7 @@ global trackLenght
 trackLenght = 1
 global j 
 j = 0
-model = population.run(run, 50)
+model = population.run(run, 500)
 
 visualize.draw_net(config, model, True, 'bla')
 

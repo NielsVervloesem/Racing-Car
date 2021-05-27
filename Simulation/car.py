@@ -30,8 +30,8 @@ class Car:
 
         #build car body based on the lenght
         self.car_length = 50
-        self.car_width = 30 
-        self.wheel_length = 10 
+        self.car_width = 30
+        self.wheel_length = 10
         self.wheel_width = 5
 
         #set params used for score calculation
@@ -40,7 +40,7 @@ class Car:
         self.checkpoint_passed = 2
         self.is_alive = True
 
-        self.radar = Radar(self.x, self.y, radar_length, (180, -90, -40, -15, 0, 15, 40, 90), math.degrees(self.steering_angle))
+        self.radar = Radar(self.x, self.y, 130, (180, -90, -40, -15, 0, 15, 40, 90), math.degrees(self.steering_angle))
 
     #When passing a checkpoint of the racetrack, reward the car with a bonus
     #First one to pass will get the max bonus, second one will recieve 500 points less
@@ -78,19 +78,21 @@ class Car:
 
         if(len(intersection1.coords) == 1):
             self.checkpoint_passed = self.checkpoint_passed + 2
-            score = self.time_alive + 900
+            score = self.time_alive + 1000
             self.time_alive = self.time
         return score
 
     #Being alive is good, small reward
     def update_score(self):
-        a = self.steering_angle + 45
-        b = self.previous_steering_angle + 45
+
+        return 10
+        a = math.degrees(self.steering_angle)
+        b = math.degrees(self.previous_steering_angle)
 
         if(a > b):
-            return 1-(a - b)
+            return -(100 - (a - b))
         else:
-            return 1-(b - a)
+            return -(100 -(b - a))
 
 
     def distanceNextCheckpoint(self, racetrack):

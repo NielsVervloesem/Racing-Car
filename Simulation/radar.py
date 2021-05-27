@@ -7,7 +7,7 @@ class Radar:
     def __init__(self, x, y, radar_length, radar_angles, car_angle):
         self.x = x
         self.y = y
-        self.radar_length = radar_length
+        self.radar_length = 130
         self.radar_angles = radar_angles
         self.radar_lines = []
         self.car_angle = car_angle
@@ -121,4 +121,4 @@ class Radar:
         if(self.lag == 5):
             self.prevReading = rds
             self.lag = 0
-        return self.prevReading
+        return rds

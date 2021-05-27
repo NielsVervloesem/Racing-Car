@@ -17,7 +17,7 @@ from random import randrange
 import visualize
 
 #MODEL PARAMS INIT
-name = "norandomnospeed120150"
+name = "V4"
 config_path = "./config-feedforward.txt"
 carMaxSpeed = 20 * 1
 carSensors = 8
@@ -63,8 +63,8 @@ def run(genomes, config):
     if(generation > 45):
         random.seed(21)
     '''
-    random.seed(7)
-    racetrack = RandomRacetrack(400, 400, 15, 130)
+    random.seed(20)
+    racetrack = RandomRacetrack(400, 400, 4, 130)
 
 
     networks = []
@@ -97,13 +97,7 @@ def run(genomes, config):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
-        pressed = pygame.key.get_pressed()
-
-        if pressed[pygame.K_RIGHT]:
-                ticks = ticks +1
-
-        if pressed[pygame.K_LEFT]:
-                ticks = ticks -1
+        
     
         #Draw racetrack
         for line in racetrack.innerHitLine:
@@ -119,7 +113,11 @@ def run(genomes, config):
             pygame.draw.line(screen, (0, 255 - colorOffset,0+colorOffset), p1, p2, 1)    
             colorOffset = colorOffset + 5
         
-        for i in range(20):
+        for i in range(len(cars)):
+            pressed = pygame.key.get_pressed()
+
+            if pressed[pygame.K_RIGHT]:
+                    run = False
         #for index, car in enumerate(cars):
             if(cars[i].is_alive):
                 #180, -90, -40, -15, 0, 15, 40, 90
@@ -182,8 +180,8 @@ def run(genomes, config):
                         if(car.steering > -45):
                             car.steering = car.steering - 45
                 else:
-                    cars[i].speed = 3# output[0] * 10
-                    cars[i].steering_angle = output[1] * car.max_steering_angle * 2 - car.max_steering_angle
+                    cars[i].speed = output[0] * 5
+                    cars[i].steering_angle = output[1] * cars[i].max_steering_angle
 
                 cars[i].update(dt)
                 #Kill off bad cars
@@ -194,23 +192,24 @@ def run(genomes, config):
                 if(cars[i].time_alive == 0):
                     cars[i].is_alive = False
 
-                '''
-                if(cars[i].speed > 9 and abs(math.degrees(cars[i].steering_angle)) > 20):
-                    cars[i].is_alive = False
-
                 
-                if(cars[i].speed > 8 and abs(math.degrees(cars[i].steering_angle)) > 25):
-                    cars[i].is_alive = False
-                if(cars[i].speed > 7 and abs(math.degrees(cars[i].steering_angle)) > 30):
-                    cars[i].is_alive = False
-                if(cars[i].speed > 6 and abs(math.degrees(cars[i].steering_angle)) > 35):
+                
+                if(cars[i].speed > 0.9*5 and abs(math.degrees(cars[i].steering_angle)) > 0.9*30):
                     cars[i].is_alive = False
                 '''
+                if(cars[i].speed > 0.8*5 and abs(math.degrees(cars[i].steering_angle)) > 0.8*30):
+                    cars[i].is_alive = False
+                if(cars[i].speed > 0.7*5 and abs(math.degrees(cars[i].steering_angle)) > 0.7*30):
+                    cars[i].is_alive = False
+                if(cars[i].speed > cars[i].speed * 0.6 and abs(math.degrees(cars[i].steering_angle)) > 0.6*30):
+                    cars[i].is_alive = False
+                '''
+                
                 if(cars[i].checkpoint_passed == len(racetrack.checkpoints)-2):
                     
                     screen.fill(background_colour)
                     pygame.display.update()
-                    racetrack = RandomRacetrack(400, 400, 15, random.randrange(120,150))
+                    racetrack = RandomRacetrack(height, width, 15, 130)
                     
                     for c in cars:
                         if(cars[i].is_alive):
@@ -225,7 +224,6 @@ def run(genomes, config):
                             c.orientation =math.radians(-90)
 
                             c.radar.car_angle = -90
-                            c.radar.radar_length = radar_lenght
                             c.radar.updateRadar(int(racetrack.start[0]), int(racetrack.start[1]), -90)
                             c.time = c.time
                             c.time_alive = c.time
@@ -344,6 +342,7 @@ def run(genomes, config):
                 if(not cars[bestcarindex].is_alive):
                     fitt = -9999
 
+                fitt = genomes[bestcarindex][1].fitness
                 if(fitt < genomes[i][1].fitness):
                     fitt = genomes[i][1].fitness
                     bestcarindex = i
@@ -354,7 +353,7 @@ def run(genomes, config):
 
         #Update car fitness
         remain_cars = 0
-        for i in range(20):
+        for i in range(len(cars)):
             if(cars[i].is_alive):
                 remain_cars += 1
                 score = cars[i].check_passed(racetrack)
@@ -392,8 +391,10 @@ def run(genomes, config):
                     best_g = g[1]
                     key = g[1].key
 
-            visualize.draw_net(config, best_g, True, str(key))
+            node_names = {-1:'180°', -2: '-90°',-3:'-40°', -4: '-15°',-5:'0°', -6: '15°',-7:'40°', -8: '90°', 0:'VELOCITY', 1:'ANGLE'}
 
+            visualize.draw_net(config, best_g, False, name + 'gen' + str(generation) + 'id' + str(key) + 'fitt' + str(best), node_names=node_names)
+ 
             run = False
             '''
             j = j +1
@@ -429,13 +430,16 @@ clock = pygame.time.Clock()
 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                             neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
 
+population = neat.Checkpointer.restore_checkpoint('Models/V333')
 
+'''
 population = neat.Population(config)
+'''
 population.add_reporter(neat.StdOutReporter(True))
 stats = neat.StatisticsReporter()
 population.add_reporter(stats)
+population.add_reporter(neat.Checkpointer(1, 3600, "models/" + name))
 
-population.add_reporter(neat.Checkpointer(5, 3600, "models/checkpoint"))
 global generation
 generation = 0
 
@@ -447,11 +451,9 @@ global trackLenght
 trackLenght = 1
 global j 
 j = 0
-model = population.run(run, 500)
-
-visualize.draw_net(config, model, True, 'bla')
+model = population.run(run, 50)
 
 
-with open(name + ".pkl", "wb") as f:
+with open('Models/' + name + ".pkl", "wb") as f:
     pickle.dump(model, f)
     f.close()
